@@ -71,7 +71,7 @@
 <audio id="bellSound" src="campana.mp3"></audio>
 
 <script>
-  // --- Lista explícita de imágenes para GitHub Pages ---
+  // --- Lista fija de imágenes desde la carpeta ---
   const images = [
     "imagenes/2150812582.jpg",
     "imagenes/2150812638.jpg",
@@ -84,28 +84,22 @@
   let bgInterval;
 
   // Inicializamos los dos primeros fondos
-  if(images.length>0) bg1.style.backgroundImage = `url('${images[0]}')`;
-  if(images.length>1) bg2.style.backgroundImage = `url('${images[1]}')`;
+  bg1.style.backgroundImage = `url('${images[0]}')`;
+  bg2.style.backgroundImage = `url('${images[1]}')`;
 
-  function getNextImage(){
-    if(images.length<=1) return images[0];
-    const options = images.filter(img => img !== images[currentImage]);
-    const idx = Math.floor(Math.random()*options.length);
-    const nextImage = options[idx];
-    currentImage = images.indexOf(nextImage);
-    return nextImage;
+  function nextBackground(){
+    currentImage = (currentImage + 1) % images.length;
+    const nextImg = images[currentImage];
+    const activeLayer = currentLayer===1 ? bg1 : bg2;
+    const nextLayer = currentLayer===1 ? bg2 : bg1;
+    nextLayer.style.backgroundImage = `url('${nextImg}')`;
+    nextLayer.classList.add('active');
+    activeLayer.classList.remove('active');
+    currentLayer = currentLayer===1 ? 2 : 1;
   }
 
   function startBackgroundLoop(){
-    bgInterval = setInterval(()=>{
-      const nextImg = getNextImage();
-      const activeLayer = currentLayer===1 ? bg1 : bg2;
-      const nextLayer = currentLayer===1 ? bg2 : bg1;
-      nextLayer.style.backgroundImage = `url('${nextImg}')`;
-      nextLayer.classList.add('active');
-      activeLayer.classList.remove('active');
-      currentLayer = currentLayer===1 ? 2 : 1;
-    },20000);
+    bgInterval = setInterval(nextBackground, 20000); // cada 20 segundos
   }
 
   // --- Temporizador ---
