@@ -16,7 +16,6 @@
   }
   .bg.active { opacity:1; }
 
-  /* Temporizador con efecto terrorífico */
   #timer {
     position:absolute; top:100px; left:50%; transform:translateX(-50%);
     text-align:center; font-size:3em; font-weight:bold; color:red;
@@ -36,7 +35,6 @@
     text-shadow:2px 2px 10px black; user-select:none; opacity:1; transition:opacity 0.5s ease;
   }
 
-  /* Overlay de ingreso de tiempo */
   #overlay {
     position:absolute; top:0; left:0; width:100%; height:100%;
     background:rgba(0,0,0,0.8); display:flex; flex-direction:column;
@@ -64,7 +62,6 @@
 <div id="timer">00:00:00</div>
 <div id="musicToggle" title="Activar / Desactivar música">🔊</div>
 
-<!-- Overlay para ingresar tiempo -->
 <div id="overlay">
   <input type="text" id="timeInput" placeholder="hh:mm:ss" maxlength="8">
   <button id="startBtn" disabled>Iniciar Temporizador</button>
@@ -74,28 +71,22 @@
 <audio id="bellSound" src="campana.mp3"></audio>
 
 <script>
-  // --- Fondos automáticos ---
-  const imagesFolder = "imagenes/";
-  let images = [];
+  // --- Lista explícita de imágenes para GitHub Pages ---
+  const images = [
+    "imagenes/2150812582.jpg",
+    "imagenes/2150812638.jpg",
+    "imagenes/2150838758.jpg"
+  ];
+
   let currentImage = 0, currentLayer = 1;
   const bg1 = document.getElementById('bg1');
   const bg2 = document.getElementById('bg2');
-
-  // Función para iniciar loop de fondos
   let bgInterval;
-  function startBackgroundLoop(){
-    bgInterval = setInterval(()=>{
-      const nextImage = getNextImage();
-      const activeLayer = currentLayer===1 ? bg1 : bg2;
-      const nextLayer = currentLayer===1 ? bg2 : bg1;
-      nextLayer.style.backgroundImage = `url('${nextImage}')`;
-      nextLayer.classList.add('active');
-      activeLayer.classList.remove('active');
-      currentLayer = currentLayer===1 ? 2 : 1;
-    }, 20000);
-  }
 
-  // Función para obtener siguiente imagen aleatoria sin repetir
+  // Inicializamos los dos primeros fondos
+  if(images.length>0) bg1.style.backgroundImage = `url('${images[0]}')`;
+  if(images.length>1) bg2.style.backgroundImage = `url('${images[1]}')`;
+
   function getNextImage(){
     if(images.length<=1) return images[0];
     const options = images.filter(img => img !== images[currentImage]);
@@ -105,25 +96,17 @@
     return nextImage;
   }
 
-  // Cargar automáticamente imágenes desde la carpeta (requiere servidor local)
-  fetch(imagesFolder)
-    .then(response => response.text())
-    .then(data => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(data, "text/html");
-      const links = Array.from(doc.querySelectorAll("a"));
-      images = links
-        .map(a => a.getAttribute("href"))
-        .filter(href => /\.(jpg|jpeg|png|gif)$/i.test(href))
-        .map(file => imagesFolder + file);
-
-      if(images.length>0){
-        bg1.style.backgroundImage = `url('${images[0]}')`;
-        if(images.length>1) bg2.style.backgroundImage = `url('${images[1]}')`;
-        currentImage = 0;
-      }
-    })
-    .catch(err => console.log("No se pudieron cargar las imágenes:", err));
+  function startBackgroundLoop(){
+    bgInterval = setInterval(()=>{
+      const nextImg = getNextImage();
+      const activeLayer = currentLayer===1 ? bg1 : bg2;
+      const nextLayer = currentLayer===1 ? bg2 : bg1;
+      nextLayer.style.backgroundImage = `url('${nextImg}')`;
+      nextLayer.classList.add('active');
+      activeLayer.classList.remove('active');
+      currentLayer = currentLayer===1 ? 2 : 1;
+    },20000);
+  }
 
   // --- Temporizador ---
   const timerDisplay = document.getElementById('timer');
@@ -156,7 +139,7 @@
     return h*3600 + m*60 + s;
   }
 
-  // Formateo en tiempo real y validación
+  // Validación y formateo en tiempo real
   timeInput.addEventListener('input',()=>{
     let val = timeInput.value.replace(/[^0-9]/g,'');
     if(val.length>6) val=val.slice(0,6);
